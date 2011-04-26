@@ -1,0 +1,5 @@
+Before run it you must change values like server, port, channel, auth_login, auth_password and change standard op in ops table (you probably won't me as admin of this bot?)
+
+To run you need:
+Python 2.4 or higher
+SimpleJSON for this python

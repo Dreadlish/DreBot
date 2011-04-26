@@ -1,32 +1,65 @@
 #!/usr/bin/python2
 # -*- coding: utf-8 -*-
+#
+# main.py of DreBot
+#
+#       Copyright 2011 dreadlish <krzysiek996@gmail.com>
+#       
+#       Redistribution and use in source and binary forms, with or without
+#       modification, are permitted provided that the following conditions are
+#       met:
+#       
+#       * Redistributions of source code must retain the above copyright
+#         notice, this list of conditions and the following disclaimer.
+#       * Redistributions in binary form must reproduce the above
+#         copyright notice, this list of conditions and the following disclaimer
+#         in the documentation and/or other materials provided with the
+#         distribution.
+#       * Neither the name of the dreadlish nor the names of its
+#         contributors may be used to endorse or promote products derived from
+#         this software without specific prior written permission.
+#       
+#       THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#       "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#       LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+#       A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+#       OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+#       SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+#       LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#       DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#       THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#       (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#       OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import sys
-import socket
-import re
-import pickle
-import commands
-import urllib
-import simplejson
-import time
-import os
-import random
+import sys # for exit
+import socket # for connecting to internet
+import re # for regexps
+import pickle # for saving data like seen and ops
+import commands # its probably for #uptime - idk
+import urllib # for google, and biszkopcik
+import simplejson # for google
+import time # for seen
+import os # next for #uptime?
+import random # for #slap
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #standard ipv4 socket - you can do it for ipv6 if you want
 
-HOST = "chat.eu.freenode.net" # Serwer
-PORT = 6667 #kanał
+HOST = "chat.eu.freenode.net" # server
+PORT = 6667 # port to connect to server
 
-NAME = "DreBot" #nazwa
+NAME = "DreBot" # nickname for bot on IRC
 
-PREFIX = "#" #prefix
+PREFIX = "#" # prefix for command
 
-CHANNEL = "#trollownia" #kanał
+CHANNEL = "#trollownia" # channel, where DreBot is present
 
-ops = { "unaffiliated/dreadlish": "Dreadlish" } #opowie jak nie ma data.pickled
+ops = { "unaffiliated/dreadlish": "Dreadlish" } # list of ops if data.pickled isn't present
 
-seen = { } #widziani - pusta od razu
+seen = { } # last seen - this list is empty by default
 
+auth_login = "" # login for nickserv
+auth_password = "" # password for nickserv
+# nouns and adjectives for #slap - you can skip to next comment
 nouns = ['trout','space ship','Orlando Bloom','pi','apple pie',
 'rad scorpion','rock band','metal band','Lord of the Rings',
 'One','board','tv','floppy 5.25"','dschinn','dice','shadowrunner',
@@ -110,14 +143,16 @@ adjectives = ['large','small','foul','steam-powered','empty',
 'blue','yellow','pink','white','black','green','painted',
 'colorful','holy','meaningful','monstrous',
 'virtual','private','public','smellin','vile']
+#end of nouns and adjectives
 
+# DreBot answers in polish - if you like you can translate it to other languages
 def connect(so):
 	while True:
 		try:
 			so.connect((HOST, PORT))
-			so.send("USER root 8 * : Root\n")
+			so.send("USER drebot 8 * :DreBot\n")
 			so.send("NICK " + NAME + "\n")
-			# so.send("PRIVMSG NickServ :IDENTIFY \n") #<<-- wsadzić tylko jak jest ident i dopisać ocb. 
+			so.send("PRIVMSG NickServ :IDENTIFY " + auth_login + " " + auth_password + "\n") 
 			break
 		except:
 			warnmsg("Cannot connect to server! Reconnecting...")
@@ -284,7 +319,7 @@ def sops(s, mes):
 	s.send("PRIVMSG " + CHANNEL + " :" + mes[0].split("!")[0][1:] + ": " + " ".join(ops.values()) + "\n")
 	return
 
-def biszkopcik(s, mes):
+def biszkopcik(s, mes): #this is uptime for my friend
 	try:
 		lol = urllib.urlopen("http://biszkopcik.eu/uptime.txt").read()
 		s.send("PRIVMSG " + CHANNEL + " :" + lol + "\n")
